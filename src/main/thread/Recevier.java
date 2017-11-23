@@ -1,7 +1,11 @@
+package main.thread;
+
 import main.MUTPInterface.ReceiverHandleInterface;
+import main.MUTPInterface.RecvACKHandleInterface;
+import main.MUTPInterface.impl.RecvACKHandleImpl;
 import main.MUTPInterface.impl.RecvHandleImpl;
+import main.common.ConnectState;
 import main.common.DataPacket;
-import main.common.mutpConst;
 import org.apache.log4j.Logger;
 
 import java.io.ByteArrayInputStream;
@@ -12,25 +16,43 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 
 /**
+ * 接收器线程
  * Created by liqiushi on 2017/11/21.
  */
-/*
-public class Sender implements Runnable {
+public class Recevier implements Runnable {
+    
     private DatagramSocket srvSocket;
+    private InetSocketAddress dstSocketAddr;
     private ReceiverHandleInterface recvHandle = new RecvHandleImpl();
+    private Logger logger = Logger.getLogger(Recevier.class);
 
-    private Logger logger = Logger.getLogger(Sender.class);
+    public Recevier(DatagramSocket srvSocket, InetSocketAddress dstSocketAddr) {
+        this.srvSocket = srvSocket;
+        this.dstSocketAddr = dstSocketAddr;
+    }
+    
+    public void handle(DataPacket dataPacket,Recevier recevier) throws IOException {
+        recvHandle.handle(dataPacket,recevier);
+    }
+    
+    public DatagramSocket getSrvSocket() {
+        return srvSocket;
+    }
 
-    public Sender(DatagramSocket srvSocket) {
+    public void setSrvSocket(DatagramSocket srvSocket) {
         this.srvSocket = srvSocket;
     }
 
-    public void handle(DataPacket dataPacket) {
-        recvHandle.handle(DataPacket dataPacket);
+    public InetSocketAddress getDstSocketAddr() {
+        return dstSocketAddr;
     }
 
+    public void setDstSocketAddr(InetSocketAddress dstSocketAddr) {
+        this.dstSocketAddr = dstSocketAddr;
+    }
     @Override
     public void run() {
+        logger.info("server thread has started!");
         ByteArrayInputStream bais = null;
         ObjectInputStream ois = null;
         while (true) {
@@ -41,7 +63,7 @@ public class Sender implements Runnable {
                 bais = new ByteArrayInputStream(buf);
                 ois = new ObjectInputStream(bais);
                 DataPacket dataPacket = (DataPacket) ois.readObject();
-                handle(dataPacket);
+                handle(dataPacket,this);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
@@ -50,4 +72,4 @@ public class Sender implements Runnable {
             }
         }
     }
-}*/
+}

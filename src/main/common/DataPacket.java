@@ -33,7 +33,7 @@ public class DataPacket implements Serializable {
         this.header = header;
     }
 
-    @Transient
+    //@Transient
     public byte[] getBuf() {
         return buf;
     }

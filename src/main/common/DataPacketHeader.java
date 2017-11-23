@@ -2,9 +2,6 @@ package main.common;
 
 import java.io.Serializable;
 
-/**
- * Created by liqiushi on 2017/11/22.
- */
 public class DataPacketHeader implements Serializable {
     private boolean ACK;
     private boolean SYN;

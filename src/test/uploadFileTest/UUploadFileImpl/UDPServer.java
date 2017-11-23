@@ -12,7 +12,7 @@ import java.net.InetSocketAddress;
  * Created by liqiushi on 2017/11/22.
  */
 public class UDPServer {
-    private static final String SAVE_FILE_PATH = "E:/五月天 - 倔强.mp3";
+    private static final String SAVE_FILE_PATH = "E:/1.mp3";
 
     public static void main(String[] args) {
 
