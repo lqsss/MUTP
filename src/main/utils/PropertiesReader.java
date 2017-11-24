@@ -1,9 +1,6 @@
 package main.utils;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 
 /**
@@ -34,10 +31,12 @@ public class PropertiesReader {
     private void readConfig() {
         pros = new Properties();
         InputStream in = null;
+        InputStreamReader reader = null;
         try {
             in = new FileInputStream(Thread.currentThread().getContextClassLoader().getResource("")
                     .getPath() + "args.properties");
-            pros.load(in);
+            reader = new InputStreamReader(in,"UTF-8");
+            pros.load(reader);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

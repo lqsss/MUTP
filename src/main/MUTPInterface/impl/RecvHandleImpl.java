@@ -4,7 +4,7 @@ import main.MUTPInterface.ReceiverHandleInterface;
 import main.common.DataPacket;
 import main.common.DataPacketFactory;
 import main.common.DataPacketHeader;
-import main.common.mutpConst;
+import main.common.MutpConst;
 import main.thread.Recevier;
 import main.utils.PacketUtil;
 import org.apache.log4j.Logger;
@@ -34,12 +34,13 @@ public class RecvHandleImpl implements ReceiverHandleInterface {
         //如果是SYN包，返回对等方一个SYN ACK
         if (SYN && !ACK){
             logger.info("5900->5800 [SYN] ack = " + ackNum + " seq =" + seqNum);
-            dpk = DataPacketFactory.getInstance(mutpConst.SYN_ACK);
+            dpk = DataPacketFactory.getInstance(MutpConst.SYN_ACK);
             PacketUtil.sendPackt(socket,addr,dpk);
         }else if(!SYN&&ACK){
             //如果收到的是一个ACK
             logger.info("5900->5800 [ACK] ack = " + ackNum + " seq =" + seqNum);
-            dpk = DataPacketFactory.getInstance(mutpConst.SYN_ACK);
+            dpk = DataPacketFactory.getInstance(MutpConst.ACK_ONLY);
+            dpk.getHeader().setAckNum(seqNum+1);
             PacketUtil.sendPackt(socket,addr,dpk);
         }else if(!SYN && !ACK){
             //传输文件

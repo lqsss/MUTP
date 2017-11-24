@@ -3,7 +3,7 @@ package main.thread;
 import main.common.ConnectState;
 import main.common.DataPacket;
 import main.common.DataPacketFactory;
-import main.common.mutpConst;
+import main.common.MutpConst;
 import org.apache.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
@@ -58,7 +58,7 @@ public class Connector implements Runnable {
 
         while (!connectState.isConnected()) {
             //首先发送只有SYN的包
-            DataPacket dataPacket = DataPacketFactory.getInstance(mutpConst.SYN_ONLY);
+            DataPacket dataPacket = DataPacketFactory.getInstance(MutpConst.SYN_ONLY);
             try {
                 sendPackt(cliSocket, dstSocketAddr, dataPacket);
                 TimeUnit.SECONDS.sleep(2);
@@ -74,14 +74,18 @@ public class Connector implements Runnable {
                 logger.info("继续发送SYN包");
                 continue;
             }
-            dataPacket = DataPacketFactory.getInstance(mutpConst.ACK_ONLY);
+            dataPacket = DataPacketFactory.getInstance(MutpConst.ACK_ONLY);
             try {
                 sendPackt(cliSocket, dstSocketAddr, dataPacket);
+                Thread.sleep(2000);
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            logger.info("确认连接成功！");
         }
+        logger.info("确认连接成功！");
         //传输文件的线程
+        
     }
 }

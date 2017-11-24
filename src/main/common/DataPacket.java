@@ -11,7 +11,8 @@ import java.io.Serializable;
 public class DataPacket implements Serializable {
     private DataPacketHeader header;
     private byte[] buf ;
-   
+    private int windowSize = 5;
+    
     private String bufSize = PropertiesReader.getInstance().getValue("bufSize");
 
     public DataPacket(DataPacketHeader header, byte[] buf) {
@@ -40,6 +41,14 @@ public class DataPacket implements Serializable {
 
     public void setBuf(byte[] buf) {
         this.buf = buf;
+    }
+
+    public int getWindowSize() {
+        return windowSize;
+    }
+
+    public void setWindowSize(int windowSize) {
+        this.windowSize = windowSize;
     }
     
 }

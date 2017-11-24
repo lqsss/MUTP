@@ -22,8 +22,7 @@ public class Recvtor implements Runnable{
     private DatagramSocket cliSocket;
     private InetSocketAddress dstSocketAddr;
     private ConnectState connectState;
-    private int lastACKed = 0;
-    private int lastSentedByte = 0;
+
     private RecvACKHandleInterface recvImpl = new RecvACKHandleImpl(); 
     
 /*    private M<Integer,byte[]> = new ArrayList*/
@@ -35,22 +34,7 @@ public class Recvtor implements Runnable{
         this.dstSocketAddr = dstSocketAddr;
         this.connectState = connectState;
     }
-    public int getLastACKed() {
-        return lastACKed;
-    }
-
-    public void setLastACKed(int lastACKed) {
-        this.lastACKed = lastACKed;
-    }
-
-
-    public int getLastSentedByte() {
-        return lastSentedByte;
-    }
-
-    public void setLastSentedByte(int lastSentedByte) {
-        this.lastSentedByte = lastSentedByte;
-    }
+  
 
 
     public ConnectState getConnectState() {
@@ -88,6 +72,4 @@ public class Recvtor implements Runnable{
             }
         }
     }
-    
-    
 }
