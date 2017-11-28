@@ -86,6 +86,6 @@ public class Connector implements Runnable {
         }
         logger.info("确认连接成功！");
         //传输文件的线程
-        
+     
     }
 }

@@ -2,7 +2,7 @@ package test;
 
 import main.common.DataPacket;
 import main.common.DataPacketHeader;
-import main.common.mutpConst;
+import main.common.MutpConst;
 import main.utils.PropertiesReader;
 
 import java.io.ByteArrayOutputStream;
@@ -19,10 +19,10 @@ import java.net.SocketException;
  */
 public class Client {
     public static void main(String[] args) throws IOException {
-        String dstPort = mutpConst.dstPort;
-        String dstHost = mutpConst.dstHost;
-        String srcPort = mutpConst.srcPort;
-        String srcHost = mutpConst.srcHost;
+        String dstPort = MutpConst.dstPort;
+        String dstHost = MutpConst.dstHost;
+        String srcPort = MutpConst.srcPort;
+        String srcHost = MutpConst.srcHost;
         InetSocketAddress clientSocketAddr = new InetSocketAddress(srcHost,Integer.parseInt(srcPort));
         InetSocketAddress serverSocketAddr = new InetSocketAddress(dstHost,Integer.parseInt(dstPort));
         try {

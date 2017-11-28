@@ -1,19 +1,16 @@
 package main.thread;
 
 import main.MUTPInterface.ReceiverHandleInterface;
-import main.MUTPInterface.RecvACKHandleInterface;
-import main.MUTPInterface.impl.RecvACKHandleImpl;
 import main.MUTPInterface.impl.RecvHandleImpl;
-import main.common.ConnectState;
 import main.common.DataPacket;
 import org.apache.log4j.Logger;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * 接收器线程
@@ -24,11 +21,36 @@ public class Recevier implements Runnable {
     private DatagramSocket srvSocket;
     private InetSocketAddress dstSocketAddr;
     private ReceiverHandleInterface recvHandle = new RecvHandleImpl();
+    private Map<Integer,byte[]> tmpList = new TreeMap<>();
+    private int expectSeqnum =2;
+
+
+    private int windowSize;
+
+    private BufferedOutputStream bos = null;
     private Logger logger = Logger.getLogger(Recevier.class);
 
-    public Recevier(DatagramSocket srvSocket, InetSocketAddress dstSocketAddr) {
+    public Recevier(DatagramSocket srvSocket, InetSocketAddress dstSocketAddr) throws FileNotFoundException {
         this.srvSocket = srvSocket;
         this.dstSocketAddr = dstSocketAddr;
+        bos = new BufferedOutputStream(new FileOutputStream("E:/7.mp3"));
+    }
+
+
+    public BufferedOutputStream getBos() {
+        return bos;
+    }
+
+    public void setBos(BufferedOutputStream bos) {
+        this.bos = bos;
+    }
+
+    public Map<Integer, byte[]> getTmpList() {
+        return tmpList;
+    }
+
+    public void setTmpList(Map<Integer, byte[]> tmpList) {
+        this.tmpList = tmpList;
     }
     
     public void handle(DataPacket dataPacket,Recevier recevier) throws IOException {
@@ -50,13 +72,30 @@ public class Recevier implements Runnable {
     public void setDstSocketAddr(InetSocketAddress dstSocketAddr) {
         this.dstSocketAddr = dstSocketAddr;
     }
+
+    public int getExpectSeqnum() {
+        return expectSeqnum;
+    }
+
+    public void setExpectSeqnum(int expectSeqnum) {
+        this.expectSeqnum = expectSeqnum;
+    }
+
+    public int getWindowSize() {
+        return windowSize;
+    }
+
+    public void setWindowSize(int windowSize) {
+        this.windowSize = windowSize;
+    }
+
     @Override
     public void run() {
         logger.info("server thread has started!");
         ByteArrayInputStream bais = null;
         ObjectInputStream ois = null;
         while (true) {
-            byte[] buf = new byte[1024 * 2];
+            byte[] buf = new byte[10240* 2];
             DatagramPacket dp = new DatagramPacket(buf, buf.length);
             try {
                 srvSocket.receive(dp);

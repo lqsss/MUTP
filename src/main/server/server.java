@@ -1,11 +1,9 @@
 package main.server;
 
-import main.common.DataPacket;
-import main.common.mutpConst;
+import main.common.MutpConst;
 import main.thread.Recevier;
 
 import java.io.*;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
@@ -15,10 +13,10 @@ import java.net.SocketException;
  */
 public class server {
     public static void main(String[] args) {
-        String dstPort = mutpConst.dstPort;
-        String dstHost = mutpConst.dstHost;
-        String srcPort = mutpConst.srcPort;
-        String srcHost = mutpConst.srcHost;
+        String dstPort = MutpConst.dstPort;
+        String dstHost = MutpConst.dstHost;
+        String srcPort = MutpConst.srcPort;
+        String srcHost = MutpConst.srcHost;
         InetSocketAddress clientSocketAddr = new InetSocketAddress(srcHost, Integer.parseInt(srcPort));
         InetSocketAddress serverSocketAddr = new InetSocketAddress(dstHost, Integer.parseInt(dstPort));
         try {
@@ -26,7 +24,9 @@ public class server {
             new Thread(new Recevier(socket,clientSocketAddr)).start();
         } catch (SocketException e) {
             e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-      
+
     }
 }

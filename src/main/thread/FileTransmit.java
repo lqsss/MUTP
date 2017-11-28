@@ -4,10 +4,13 @@ import main.MUTPInterface.RecvACKHandleInterface;
 import main.common.DataPacket;
 import main.common.DataPacketFactory;
 import main.common.MutpConst;
+import main.utils.PacketUtil;
 import main.utils.PropertiesReader;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +26,13 @@ public class FileTransmit implements Runnable {
     //    private int windowSizeMaxium = 5;
     private int lastSend = 5;
     private RecvACKHandleInterface impl = null;
+    DatagramSocket cliSocket;
+    InetSocketAddress dstSocketAddr;
 
-    public FileTransmit(RecvACKHandleInterface impl) {
+    public FileTransmit(RecvACKHandleInterface impl, DatagramSocket cliSocket, InetSocketAddress dstSocketAddr) {
         this.impl = impl;
+        this.cliSocket = cliSocket;
+        this.dstSocketAddr = dstSocketAddr;
     }
 
     /**
@@ -43,8 +50,10 @@ public class FileTransmit implements Runnable {
         int bufSize = Integer.parseInt(PropertiesReader.getInstance().getValue("bufSize"));
         byte[] buf = new byte[bufSize];
         while ((readSize = accessFile.read(buf, 0, buf.length)) != -1) {
-            allPackets.put(count, buf);
-            count += bufSize;
+            byte[] tmpBuf = new byte[readSize];
+            System.arraycopy(buf, 0, tmpBuf, 0, readSize);
+            allPackets.put(count, tmpBuf);
+            count += readSize;
         }
         return allPackets;
     }
@@ -62,21 +71,26 @@ public class FileTransmit implements Runnable {
             allPackets = readFileInMap(accessFile);
             //发送
             int sendSizeLimit = impl.getSendSizeLimit();
-            int lastSentByte = impl.getLastSentedByte();
-            for (int i = 0; i < sendSizeLimit; i++) {
-                DataPacket dpk = DataPacketFactory.getInstance(MutpConst.DATA_ONLY);
 
+            for (int i = 0; i < sendSizeLimit; i++) {
+                int lastSentByte = impl.getLastSentedByte();
+                DataPacket dpk = DataPacketFactory.getInstance(MutpConst.DATA_ONLY);
                 if (lastSentByte == -1) {
                     //第一次发送
                     dpk.setBuf(allPackets.get(2));
                     dpk.getHeader().setSeqNum(2);
-                }else{
-                    //假设发送seq = 3 2是第一个字节序号，2、3、4，下一个发5-----
-                    dpk.setBuf(allPackets.get(lastSentByte+1));
-                    dpk.getHeader().setSeqNum(lastSentByte+1);
+                    impl.setLastSentedByte(2 + dpk.getBuf().length - 1);
+                } else {
+                    //假设发送seq = 3 3是第一个字节序号，3、4，下一个发5-----
+                    dpk.setBuf(allPackets.get(lastSentByte + 1));
+                    if (dpk.getBuf() == null) {
+                        logger.info("null   "+lastSentByte + 1);
+                        return;
+                    }
+                    dpk.getHeader().setSeqNum(impl.getLastSentedByte() + 1);
+                    impl.setLastSentedByte(lastSentByte + dpk.getBuf().length);
                 }
-                
-                
+                PacketUtil.sendPackt(cliSocket, dstSocketAddr, dpk);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

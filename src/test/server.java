@@ -2,7 +2,7 @@ package test;
 
 import main.common.DataPacket;
 import main.common.DataPacketHeader;
-import main.common.mutpConst;
+import main.common.MutpConst;
 
 import java.io.*;
 import java.net.DatagramPacket;
@@ -15,10 +15,10 @@ import java.net.SocketException;
  */
 public class server {
     public static void main(String[] args) {
-        String dstPort = mutpConst.dstPort;
-        String dstHost = mutpConst.dstHost;
-        String srcPort = mutpConst.srcPort;
-        String srcHost = mutpConst.srcHost;
+        String dstPort = MutpConst.dstPort;
+        String dstHost = MutpConst.dstHost;
+        String srcPort = MutpConst.srcPort;
+        String srcHost = MutpConst.srcHost;
         InetSocketAddress clientSocketAddr = new InetSocketAddress(srcHost, Integer.parseInt(srcPort));
         InetSocketAddress serverSocketAddr = new InetSocketAddress(dstHost, Integer.parseInt(dstPort));
         ByteArrayInputStream bais = null;

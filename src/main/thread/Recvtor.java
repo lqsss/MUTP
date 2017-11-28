@@ -12,13 +12,12 @@ import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by liqiushi on 2017/11/23.
  */
 public class Recvtor implements Runnable{
+
     private DatagramSocket cliSocket;
     private InetSocketAddress dstSocketAddr;
     private ConnectState connectState;
@@ -45,6 +44,22 @@ public class Recvtor implements Runnable{
         this.connectState = connectState;
     }
 
+    public DatagramSocket getCliSocket() {
+        return cliSocket;
+    }
+
+    public void setCliSocket(DatagramSocket cliSocket) {
+        this.cliSocket = cliSocket;
+    }
+
+    public InetSocketAddress getDstSocketAddr() {
+        return dstSocketAddr;
+    }
+
+    public void setDstSocketAddr(InetSocketAddress dstSocketAddr) {
+        this.dstSocketAddr = dstSocketAddr;
+    }
+
 
     public void handle(DataPacket dataPacket){
         recvImpl.handleAsSYNACK(dataPacket,this);
@@ -56,13 +71,16 @@ public class Recvtor implements Runnable{
         ByteArrayInputStream bais = null;
         ObjectInputStream ois = null;
         while(true){
-            byte[] buf = new byte[1024*2];
+            byte[] buf = new byte[10240*2];
             DatagramPacket dp = new DatagramPacket(buf,buf.length);
             try {
                 cliSocket.receive(dp);
                 bais = new ByteArrayInputStream(buf);
                 ois = new ObjectInputStream(bais);
                 DataPacket dataPacket = (DataPacket) ois.readObject();
+                if(dataPacket ==null){
+                    logger.info("null");
+                }
                 handle(dataPacket);
             } catch (IOException e) {
                 e.printStackTrace();
