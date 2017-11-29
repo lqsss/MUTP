@@ -2,10 +2,17 @@ package main.MUTPInterface.impl;
 
 import main.MUTPInterface.RecvACKHandleInterface;
 import main.common.DataPacket;
+import main.common.DataPacketFactory;
 import main.common.DataPacketHeader;
+import main.common.MutpConst;
 import main.thread.FileTransmit;
 import main.thread.Recvtor;
+import main.thread.TimerCheckout;
+import main.utils.PacketUtil;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Created by liqiushi on 2017/11/23.
@@ -24,16 +31,16 @@ public class RecvACKHandleImpl implements RecvACKHandleInterface {
         this.sendSizeLimit = sendSizeLimit;
     }
     @Override
-    public int getLastACKed() {
+    public synchronized int getLastACKed() {
         return lastACKed;
     }
     @Override
-    public void setLastACKed(int lastACKed) {
+    public synchronized void setLastACKed(int lastACKed) {
         this.lastACKed = lastACKed;
     }
 
     @Override
-    public int getLastSentedByte() {
+    public  int getLastSentedByte() {
         return lastSentedByte;
     }
     @Override
@@ -65,15 +72,34 @@ public class RecvACKHandleImpl implements RecvACKHandleInterface {
                 dupTimes++;
                 logger.info("5800->5900 dup ack:" + ackNum);
             }
-            if (dupTimes >= 3) {
+            if (dupTimes >= 2) {
                 logger.info("transmit again!");
-                //重传，并且重设定时器   
+                //Todo 定时任务
+                //重传，并且重设定时器  
+                if(dataPacket.getWindowSize()>0){
+                    Map<Integer, byte[]> allPackets = recvtor.getAllPackets();
+                    DataPacket reSendDpk = DataPacketFactory.getInstance(MutpConst.DATA_ONLY);
+                    reSendDpk.setBuf(allPackets.get(ackNum));
+                    reSendDpk.getHeader().setSeqNum(ackNum);
+                    try {
+                        PacketUtil.sendPackt(recvtor.getCliSocket(),recvtor.getDstSocketAddr(),reSendDpk);
+                        //new TimerCheckout(this,reSendDpk,recvtor.getCliSocket(),recvtor.getDstSocketAddr()).goTask();
+                        logger.info("重传 " +reSendDpk.getHeader().getSeqNum());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }else{
+                    logger.info("windowSize:0 could not send!");
+                }
                 dupTimes= 1;
+                return;
             }
+            setLastACKed(ackNum);
             //启动文件发送线程(XXXXX)
             setSendSizeLimit(dataPacket.getWindowSize());
+            logger.info(getSendSizeLimit());
             new FileTransmit(this,recvtor.getCliSocket(),recvtor.getDstSocketAddr()).run();
-            setLastACKed(ackNum);
+            
             //
         }
     }

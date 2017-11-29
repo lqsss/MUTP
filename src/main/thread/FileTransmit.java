@@ -91,6 +91,8 @@ public class FileTransmit implements Runnable {
                     impl.setLastSentedByte(lastSentByte + dpk.getBuf().length);
                 }
                 PacketUtil.sendPackt(cliSocket, dstSocketAddr, dpk);
+                //Todo 定时任务
+                new TimerCheckout(impl,dpk,cliSocket,dstSocketAddr).goTask();
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

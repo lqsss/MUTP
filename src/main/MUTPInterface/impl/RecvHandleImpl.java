@@ -54,11 +54,10 @@ public class RecvHandleImpl implements ReceiverHandleInterface {
             PacketUtil.sendPackt(socket, addr, dpk);
         } else if (!SYN && !ACK) {
             logger.info("5900 -> 5800 Data seq = "+seqNum);
+            DataPacket ackPacket = DataPacketFactory.getInstance(MutpConst.ACK_ONLY);
             //如果是跟前面的连起来 就写入文件 并且返回一个当前最大的ack
             if (tmpList.size() < 5) {
                 tmpList.put(seqNum, dataPacket.getBuf());
-
-                DataPacket ackPacket = DataPacketFactory.getInstance(MutpConst.ACK_ONLY);
 
                 if (dataPacket.getHeader().getSeqNum() != expectSeqnum) {
                     //如果不相等 则返回map中key最小的ackNum
@@ -68,18 +67,42 @@ public class RecvHandleImpl implements ReceiverHandleInterface {
                     Iterator<Map.Entry<Integer, byte[]>> it = tmpList.entrySet().iterator();
 
                     fileTransmit(it, expectSeqnum, recevier);
+                    ackPacket.getHeader().setAckNum(recevier.getExpectSeqnum());
                 }
-                ackPacket.getHeader().setAckNum(recevier.getExpectSeqnum());
-                logger.info("ack = " +ackPacket.getHeader().getAckNum());
-                ackPacket.setWindowSize(5 - tmpList.size());
-                logger.info("还可以发送 windowSize =  " +ackPacket.getWindowSize());
-                try {
-                    PacketUtil.sendPackt(socket, addr, ackPacket);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                
+                if(tmpList.size() == 5){
+                    ackPacket.setWindowSize(1);
+                }else{
+                    ackPacket.setWindowSize(5 - tmpList.size());
+                }
+  
+            }else if(tmpList.size() == 5){
+                 ackPacket = DataPacketFactory.getInstance(MutpConst.ACK_ONLY);
+                //不是需要的就丢弃
+                if (dataPacket.getHeader().getSeqNum() != expectSeqnum) {
+                    //如果不相等 则返回map中key最小的ackNum
+                    ackPacket.getHeader().setAckNum(expectSeqnum);
+                    logger.info("丢弃: seq = "+dataPacket.getHeader().getSeqNum());
+                    ackPacket.setWindowSize(1);
+                }else{
+                    tmpList.put(seqNum, dataPacket.getBuf());
+                    Iterator<Map.Entry<Integer, byte[]>> it = tmpList.entrySet().iterator();
+                    fileTransmit(it, expectSeqnum, recevier);
+                    ackPacket.setWindowSize(5 - tmpList.size());
+                    ackPacket.getHeader().setAckNum(recevier.getExpectSeqnum());
                 }
             }
+           
+            logger.info("ack = " +ackPacket.getHeader().getAckNum());
+            logger.info("还可以发送 windowSize =  " +ackPacket.getWindowSize());
+            try {
+                PacketUtil.sendPackt(socket, addr, ackPacket);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+ 
     }
 
     public void fileTransmit(Iterator<Map.Entry<Integer, byte[]>> iterator, int seqNum, Recevier recevier) throws IOException {
