@@ -70,12 +70,12 @@ public class RecvHandleImpl implements ReceiverHandleInterface {
                     ackPacket.getHeader().setAckNum(recevier.getExpectSeqnum());
                 }
                 
-                if(tmpList.size() == 5){
+/*                if(tmpList.size() == 5){
                     ackPacket.setWindowSize(1);
                 }else{
                     ackPacket.setWindowSize(5 - tmpList.size());
-                }
-  
+                }*/
+                ackPacket.setWindowSize(5 - tmpList.size());
             }else if(tmpList.size() == 5){
                  ackPacket = DataPacketFactory.getInstance(MutpConst.ACK_ONLY);
                 //不是需要的就丢弃
@@ -83,7 +83,8 @@ public class RecvHandleImpl implements ReceiverHandleInterface {
                     //如果不相等 则返回map中key最小的ackNum
                     ackPacket.getHeader().setAckNum(expectSeqnum);
                     logger.info("丢弃: seq = "+dataPacket.getHeader().getSeqNum());
-                    ackPacket.setWindowSize(1);
+                    ackPacket.setWindowSize(0);
+                    return ;//暂时不传ACK
                 }else{
                     tmpList.put(seqNum, dataPacket.getBuf());
                     Iterator<Map.Entry<Integer, byte[]>> it = tmpList.entrySet().iterator();
@@ -116,6 +117,7 @@ public class RecvHandleImpl implements ReceiverHandleInterface {
                 bos.write(fileByte, 0, fileByte.length);
                 recevier.setExpectSeqnum((int) entry.getKey() + fileByte.length);
                 iterator.remove();
+                logger.info("recevier.getExpectSeqnum() "+recevier.getExpectSeqnum());
                 fileTransmit(iterator, (int) entry.getKey() + fileByte.length, recevier);
             } else {
                 recevier.setExpectSeqnum(seqNum);
