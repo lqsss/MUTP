@@ -7,7 +7,6 @@ import main.common.DataPacketHeader;
 import main.common.MutpConst;
 import main.thread.FileTransmit;
 import main.thread.Recvtor;
-import main.thread.TimerCheckout;
 import main.utils.PacketUtil;
 import org.apache.log4j.Logger;
 
@@ -101,7 +100,7 @@ public class RecvACKHandleImpl implements RecvACKHandleInterface {
                 //启动文件发送线程(XXXXX)
                 setSendSizeLimit(dataPacket.getWindowSize());
                 logger.info(getSendSizeLimit());
-                if(getLastSentedByte() - getLastACKed() <= 5){
+                if(getLastSentedByte() - getLastACKed() <= dataPacket.getWindowSize()){
                     new FileTransmit(this, recvtor.getCliSocket(), recvtor.getDstSocketAddr()).run();
                 }
                 

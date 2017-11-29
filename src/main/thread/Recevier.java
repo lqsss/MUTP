@@ -33,7 +33,7 @@ public class Recevier implements Runnable {
     public Recevier(DatagramSocket srvSocket, InetSocketAddress dstSocketAddr) throws FileNotFoundException {
         this.srvSocket = srvSocket;
         this.dstSocketAddr = dstSocketAddr;
-        bos = new BufferedOutputStream(new FileOutputStream("E:/8.mp3"));
+        bos = new BufferedOutputStream(new FileOutputStream("E:/10.mp3"));
     }
 
 
